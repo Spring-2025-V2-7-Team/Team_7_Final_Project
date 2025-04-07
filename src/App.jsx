@@ -8,6 +8,8 @@ import Profile from "./pages/Profile";
 import AdminDashboard from './pages/AdminDashboard';
 import Unauthorized from './pages/Unauthorized';
 import NavBar from './components/common/NavBar';
+import Timeline from './pages/Timeline';
+import CreatePostPage from './pages/CreatePostPage';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/timeline" element={<Timeline />} />
+        <Route path="/create-post" element={<CreatePostPage />} />
 
         {/* <Route path="/profile" element={
           <ProtectedRoute>

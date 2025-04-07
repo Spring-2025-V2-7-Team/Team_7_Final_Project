@@ -12,6 +12,8 @@ function NavBar() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/create-post">Create Post</Nav.Link>
+            <Nav.Link href="/timeline">Timeline</Nav.Link>
             <Nav.Link href="/profile">Profile</Nav.Link>
             <Nav.Link href="/messages">Messages</Nav.Link>
             <NavDropdown title="More" id="basic-nav-dropdown">
