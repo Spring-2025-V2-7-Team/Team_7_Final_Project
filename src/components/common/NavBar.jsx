@@ -2,6 +2,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import NotificationBell from '../notifications/NotificationBell';
 
 function NavBar() {
   return (
@@ -16,6 +17,9 @@ function NavBar() {
             <Nav.Link href="/timeline">Timeline</Nav.Link>
             <Nav.Link href="/profile">Profile</Nav.Link>
             <Nav.Link href="/messages">Messages</Nav.Link>
+            <Nav className="ms-auto">
+              <NotificationBell />
+            </Nav>
             <NavDropdown title="More" id="basic-nav-dropdown">
               <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
               <NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
