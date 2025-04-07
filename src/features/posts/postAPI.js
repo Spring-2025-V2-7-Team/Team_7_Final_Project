@@ -26,42 +26,42 @@
 let postId = 6;
 
 let fakeDB = [
-  {
-    id: 1,
-    content: "Excited to join ConnectWise! 🚀",
-    imageUrl: "https://source.unsplash.com/random/800x600?tech",
-    author: "Jane Doe",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    content: "Just finished building the profile page. Loving Material UI.",
-    imageUrl: "https://source.unsplash.com/random/800x600?design",
-    author: "John Smith",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    content: "Test post with no image — clean and simple.",
-    imageUrl: "",
-    author: "Alex Johnson",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 4,
-    content: "Anyone else working on cool React+Redux projects?",
-    imageUrl: "https://source.unsplash.com/random/800x600?code",
-    author: "Dev Geek",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 5,
-    content: "Friday deploys are the best... or the worst?",
-    imageUrl: "https://source.unsplash.com/random/800x600?friday",
-    author: "Meme Lord",
-    createdAt: new Date().toISOString(),
-  },
-];
+    {
+      id: 1,
+      content: "A beautiful sunset I captured last week.",
+      imageUrl: "https://picsum.photos/seed/post1/400/300",
+      author: "Jane Doe",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      content: "Coding in the wild 🧑‍💻",
+      imageUrl: "https://picsum.photos/seed/post2/400/300",
+      author: "John Smith",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 3,
+      content: "This framework is amazing. Highly recommend!",
+      imageUrl: "https://picsum.photos/seed/post3/400/300",
+      author: "Developer",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 4,
+      content: "React + Redux + SCSS = 😍",
+      imageUrl: "https://picsum.photos/seed/post4/400/300",
+      author: "UI Nerd",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 5,
+      content: "Here's a no-image post for variety.",
+      imageUrl: "",
+      author: "Minimalist",
+      createdAt: new Date().toISOString()
+    }
+  ];  
 
 export const getPosts = async () => {
   return fakeDB;

@@ -1,4 +1,4 @@
-import { Box, Typography, Card, CardMedia, CardContent } from "@mui/material";
+import { Typography, Card, CardMedia, CardContent } from "@mui/material";
 
 export default function PostCard({ post }) {
   return (
