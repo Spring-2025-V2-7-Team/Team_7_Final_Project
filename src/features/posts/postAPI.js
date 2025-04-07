@@ -26,42 +26,42 @@
 let postId = 6;
 
 let fakeDB = [
-    {
-      id: 1,
-      content: "A beautiful sunset I captured last week.",
-      imageUrl: "https://picsum.photos/seed/post1/400/300",
-      author: "Jane Doe",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 2,
-      content: "Coding in the wild 🧑‍💻",
-      imageUrl: "https://picsum.photos/seed/post2/400/300",
-      author: "John Smith",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 3,
-      content: "This framework is amazing. Highly recommend!",
-      imageUrl: "https://picsum.photos/seed/post3/400/300",
-      author: "Developer",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 4,
-      content: "React + Redux + SCSS = 😍",
-      imageUrl: "https://picsum.photos/seed/post4/400/300",
-      author: "UI Nerd",
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 5,
-      content: "Here's a no-image post for variety.",
-      imageUrl: "",
-      author: "Minimalist",
-      createdAt: new Date().toISOString()
-    }
-  ];  
+  {
+    id: 1,
+    content: "A beautiful sunset I captured last week.",
+    imageUrl: "https://picsum.photos/seed/post1/400/300",
+    author: "Jane Doe",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    content: "Coding in the wild 🧑‍💻",
+    imageUrl: "https://picsum.photos/seed/post2/400/300",
+    author: "John Smith",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    content: "This framework is amazing. Highly recommend!",
+    imageUrl: "https://picsum.photos/seed/post3/400/300",
+    author: "Developer",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 4,
+    content: "React + Redux + SCSS = 😍",
+    imageUrl: "https://picsum.photos/seed/post4/400/300",
+    author: "UI Nerd",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 5,
+    content: "Here's a no-image post for variety.",
+    imageUrl: "",
+    author: "Minimalist",
+    createdAt: new Date().toISOString(),
+  },
+];
 
 export const getPosts = async () => {
   return fakeDB;
@@ -72,15 +72,35 @@ export const createPost = async ({ content, image }) => {
   if (image) {
     imageUrl = URL.createObjectURL(image);
   }
-
   const post = {
-    id: postId++,
+    id: Date.now(),
     content,
     imageUrl,
     author: "Admin User",
     createdAt: new Date().toISOString(),
+    likes: 0,
+    comments: [],
   };
-
   fakeDB.push(post);
   return post;
+};
+
+export const likePost = async (postId, shouldLike) => {
+  const post = fakeDB.find((p) => p.id === postId);
+  if (!post) return 0;
+
+  post.likes = typeof post.likes === 'number' ? post.likes : 0;
+
+  post.likes += shouldLike ? 1 : -1;
+  return post.likes;
+};
+
+export const addComment = async (postId, text) => {
+  const post = fakeDB.find(p => p.id === postId);
+  if (!post) return null;
+
+  const comment = { text, createdAt: new Date().toISOString() };
+  post.comments = Array.isArray(post.comments) ? post.comments : [];
+  post.comments.push(comment);
+  return comment;
 };

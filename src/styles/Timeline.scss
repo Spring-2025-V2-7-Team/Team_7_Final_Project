@@ -1,3 +1,21 @@
 .post-grid {
     justify-content: space-evenly;
 }
+
+.burst {
+    animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.6);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
