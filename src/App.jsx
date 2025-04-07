@@ -1,8 +1,12 @@
 import './App.scss';
 import { Routes, Route } from 'react-router-dom';
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import ProtectedRoute from './components/routing/ProtectedRoute';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from "./pages/Profile";
+import AdminDashboard from './pages/AdminDashboard';
+import Unauthorized from './pages/Unauthorized';
 import NavBar from './components/common/NavBar';
 
 function App() {
@@ -10,10 +14,23 @@ function App() {
     <>
       <NavBar />
       <Routes>
-      <Route path='/' element={ <Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/login" element={<Register />} />
-    </Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/profile" element={<Profile />} />
+
+        {/* <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } /> */}
+        <Route path="/admin" element={
+          <ProtectedRoute role="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
     </>
   );
 }
