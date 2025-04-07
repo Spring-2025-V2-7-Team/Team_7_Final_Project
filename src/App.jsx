@@ -12,7 +12,7 @@ import Timeline from './pages/Timeline';
 import CreatePostPage from './pages/CreatePostPage';
 import Inbox from './pages/Inbox';
 import ChatRoom from './pages/ChatRoom';
-
+import Logout from './pages/Logout';
 
 function App() {
   return (
@@ -28,6 +28,8 @@ function App() {
         <Route path="/create-post" element={<CreatePostPage />} />
         <Route path="/messages" element={<Inbox />} />
         <Route path="/chat/:userId" element={<ChatRoom />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/logout" element={<Logout />} />
 
         {/* <Route path="/profile" element={
           <ProtectedRoute>
