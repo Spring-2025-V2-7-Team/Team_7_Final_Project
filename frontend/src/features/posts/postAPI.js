@@ -28,3 +28,8 @@ export const fetchComments = async (postId) => {
   const res = await API.get(`/posts/${postId}/comments`);
   return res.data;
 };
+
+export const fetchPostsByUser = async (userId) => {
+  const res = await API.get(`/posts/user/${userId}`);
+  return res.data;
+};

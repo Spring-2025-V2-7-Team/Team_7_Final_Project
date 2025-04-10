@@ -76,6 +76,8 @@ function App() {
         {isAuthenticated ? (
           <>
             <Route path="/" element={<Home />} />
+            <Route path="/home/:userId" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/messages" element={<Messages />} />

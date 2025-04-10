@@ -103,3 +103,46 @@ exports.addComment = async (req, res) => {
     res.status(500).json({ error: "Failed to add comment" });
   }
 };
+
+exports.getPostsByUser = async (req, res) => {
+  const viewerId = req.user?.id || null;
+  const userId = req.params.id;
+
+  try {
+    const result = await db.query(
+      `SELECT p.*, u.name AS author, u.avatar_url, 
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
+        EXISTS (SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) AS liked_by_user,
+        json_agg(
+          json_build_object(
+            'id', c.id,
+            'user_id', c.user_id,
+            'text', c.text,
+            'created_at', c.created_at,
+            'author', cu.name,
+            'avatar_url', cu.avatar_url
+          )
+        ) FILTER (WHERE c.id IS NOT NULL) AS comments
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      LEFT JOIN comments c ON p.id = c.post_id
+      LEFT JOIN users cu ON c.user_id = cu.id
+      WHERE p.user_id = $2
+      GROUP BY p.id, u.name, u.avatar_url
+      ORDER BY p.created_at DESC`,
+      [viewerId, userId]
+    );
+
+    const posts = result.rows.map((post) => ({
+      ...post,
+      like_count: parseInt(post.like_count),
+      liked_by_user: post.liked_by_user === true,
+      comments: post.comments || [],
+    }));
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching posts by user:", err);
+    res.status(500).json({ error: "Failed to fetch posts by user" });
+  }
+};
