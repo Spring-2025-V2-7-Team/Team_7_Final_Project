@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "postgresql://postgres:kVMFNftfBsmVSrPTuUQhNOSeEqcnZOGy@ballast.proxy.rlwy.net:28517/railway",
+  baseURL: "http://team7finalproject-production.up.railway.app",
 });
 
 API.interceptors.request.use((config) => {
