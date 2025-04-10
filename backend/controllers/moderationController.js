@@ -3,12 +3,15 @@ const db = require("../db");
 exports.getFlaggedPosts = async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT p.*, u.name AS reported_by
-       FROM posts p
-       JOIN reports r ON r.target_id = p.id AND r.report_type = 'post'
-       JOIN users u ON u.id = r.reported_by
-       GROUP BY p.id, u.name
-       ORDER BY p.created_at DESC`
+      `SELECT
+  p.*,
+  u.name AS reported_by,
+  r.reason
+FROM posts p
+JOIN reports r ON r.target_id = p.id AND r.report_type = 'post'
+JOIN users u ON u.id = r.reported_by
+ORDER BY p.created_at DESC;
+`
     );
 
     res.json(result.rows);
