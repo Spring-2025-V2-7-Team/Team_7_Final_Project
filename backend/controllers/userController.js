@@ -67,3 +67,23 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ error: "Failed to update profile" });
   }
 };
+
+exports.getUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const result = await db.query(
+      "SELECT id, name, email, avatar_url, bio, interests FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error fetching user by ID:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

@@ -13,37 +13,58 @@ import {
   Tooltip,
   TextField,
   Autocomplete,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import ReportIcon from "@mui/icons-material/Report";
-import { getAllUsers } from "../services/UserService";
+import {
+  getAllUsers,
+  fetchProfile,
+  getUserById,
+} from "../services/UserService";
 import { fetchPostsByUser } from "../features/posts/postAPI";
 import PostCard from "../components/posts/PostCard";
 import { reportItem } from "../features/moderation/moderationAPI";
 
+const REPORT_REASONS = [
+  "Inappropriate behavior",
+  "Spam or misleading",
+  "Harassment or bullying",
+  "Fake account",
+  "Other",
+];
+
 export default function Home() {
   const currentUser = useSelector((state) => state.auth.user);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [viewedUser, setViewedUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const { userId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // To re-fetch on route change
+  const location = useLocation();
 
   const isViewingOwnProfile =
     !userId || String(currentUser?.id) === String(userId);
-  const viewedUser = isViewingOwnProfile
-    ? currentUser
-    : users.find((u) => String(u.id) === String(userId));
 
   useEffect(() => {
     getAllUsers().then((res) => setUsers(res.data));
   }, [location]);
 
   useEffect(() => {
+    if (isViewingOwnProfile) {
+      fetchProfile().then((res) => setViewedUser(res.data));
+    } else {
+      getUserById(userId).then((res) => setViewedUser(res.data));
+    }
+  }, [userId, currentUser]);
+
+  useEffect(() => {
     const userToFetch = userId || currentUser?.id;
     if (userToFetch) {
       fetchPostsByUser(userToFetch)
-        .then((res) => setPosts(res.data))
+        .then((res) => setPosts(res))
         .catch((err) => {
           console.error("Error fetching posts:", err);
           setPosts([]);
@@ -58,22 +79,32 @@ export default function Home() {
     }
   };
 
-  const handleReportUser = async () => {
+  const handleReportClick = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const handleReportClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleReportSubmit = async (reason) => {
     try {
       await reportItem({
         report_type: "user",
         target_id: viewedUser.id,
-        reason: "Inappropriate behavior",
+        reason,
         reported_by: currentUser.id,
       });
       alert("User reported successfully");
     } catch (err) {
       console.error("Error reporting user", err);
       alert("Failed to report user");
+    } finally {
+      handleReportClose();
     }
   };
 
-  if (!viewedUser) return <div>Loading...</div>;
+  if (!viewedUser) return <Typography>Loading profile...</Typography>;
 
   return (
     <Box sx={{ maxWidth: "900px", margin: "auto", p: 3 }}>
@@ -99,11 +130,27 @@ export default function Home() {
             Edit Profile
           </Button>
         ) : (
-          <Tooltip title="Report User">
-            <IconButton onClick={handleReportUser}>
-              <ReportIcon color="error" />
-            </IconButton>
-          </Tooltip>
+          <>
+            <Tooltip title="Report User">
+              <IconButton onClick={handleReportClick}>
+                <ReportIcon color="error" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleReportClose}
+            >
+              {REPORT_REASONS.map((reason) => (
+                <MenuItem
+                  key={reason}
+                  onClick={() => handleReportSubmit(reason)}
+                >
+                  {reason}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
         )}
       </Card>
 
