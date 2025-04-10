@@ -14,3 +14,8 @@ export const updateUserProfileImage = async (formData) => {
   const res = await API.post("/users/profile/image", formData);
   return res.data;
 };
+
+export const getAllUsers = async () => {
+  const res = await API.get("/users");
+  return res.data;
+};

@@ -17,7 +17,7 @@ function NavBar() {
             <>
               <Nav className="me-auto">
                 <Nav.Link as={NavLink} to="/create-post">Create Post</Nav.Link>
-                <Nav.Link as={NavLink} to="/timeline">Timeline</Nav.Link>
+                <Nav.Link as={NavLink} to="/explore">Explore</Nav.Link>
                 <Nav.Link as={NavLink} to="/profile">Profile</Nav.Link>
                 <Nav.Link as={NavLink} to="/messages">Messages</Nav.Link>
                 <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>

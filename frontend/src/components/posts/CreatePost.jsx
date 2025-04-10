@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box, TextField, Button, Typography, Stack } from "@mui/material";
 import axios from "axios";
 import { fetchProfile } from "../../services/UserService";
@@ -8,6 +8,7 @@ export default function CreatePost({ onSubmit }) {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState(null);
+  const fileInputRef = useRef();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -35,11 +36,15 @@ export default function CreatePost({ onSubmit }) {
         formData.append("name", user.name);
         formData.append("id", user.id);
 
-        const res = await axios.post("http://localhost:5000/api/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const res = await axios.post(
+          "http://localhost:5000/api/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
         imageUrl = res.data.url;
       } catch (err) {
@@ -60,6 +65,7 @@ export default function CreatePost({ onSubmit }) {
       });
       setContent("");
       setImage(null);
+      if (fileInputRef.current) fileInputRef.current.value = null;
     } catch (err) {
       console.error("Post creation failed:", err);
       alert("Post creation failed");
@@ -88,6 +94,7 @@ export default function CreatePost({ onSubmit }) {
         <input
           type="file"
           accept="image/*"
+          ref={fileInputRef}
           onChange={(e) => setImage(e.target.files[0])}
         />
         <Button type="submit" variant="contained" disabled={uploading}>

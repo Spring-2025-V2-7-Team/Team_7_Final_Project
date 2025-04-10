@@ -18,6 +18,9 @@ export const handleRequest = async (
       errorMsg;
 
     toast.error(message);
-    throw error;
+
+    const enrichedError = new Error(message);
+    enrichedError.status = error.response?.status;
+    throw enrichedError;
   }
 };

@@ -27,9 +27,18 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+export const fetchAllUsers = createAsyncThunk('users/fetchAll', async (_, thunkAPI) => {
+  try {
+    return await userAPI.getAllUsers();
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data?.error || 'Failed to fetch users');
+  }
+});
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
+    allUsers: [],
     profile: null,
     loading: false,
     error: null,
@@ -51,6 +60,18 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.profile = action.payload;
+      })
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.allUsers = action.payload;
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

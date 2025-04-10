@@ -5,7 +5,7 @@ import {
   selectAuthError,
   selectAuthLoading,
 } from "../features/auth/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthForm from "../components/auth/AuthForm";
 
 export default function Login() {
@@ -45,6 +45,10 @@ export default function Login() {
         loading={loading}
         error={error}
       />
+      {/* 👉 Register Link */}
+      <p style={{ textAlign: "center", marginTop: "1rem" }}>
+        New here? <Link to="/register">Register</Link>
+      </p>
     </div>
   );
 }

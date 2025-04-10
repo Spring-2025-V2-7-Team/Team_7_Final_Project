@@ -18,6 +18,16 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { rows } = await db.query("SELECT id, name, avatar_url FROM users");
+    res.json(rows);
+  } catch (err) {
+    console.error("Failed to fetch users:", err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   const userId = req.user.id;
   const { name, bio, interests, avatarUrl } = req.body;

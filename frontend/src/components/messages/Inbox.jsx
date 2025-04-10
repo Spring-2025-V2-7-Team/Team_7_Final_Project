@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchInbox } from '../features/chat/chatSlice';
+import { fetchInbox } from '../../features/chat/chatSlice';
 
 export default function Inbox() {
   const dispatch = useDispatch();

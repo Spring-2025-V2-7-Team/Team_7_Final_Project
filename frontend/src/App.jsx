@@ -1,20 +1,24 @@
-import './App.scss';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Timeline from './pages/Timeline';
-import CreatePostPage from './pages/CreatePostPage';
-import Inbox from './pages/Inbox';
-import ChatRoom from './pages/ChatRoom';
-import Logout from './pages/Logout';
-import AdminDashboard from './pages/AdminDashboard';
-import Unauthorized from './pages/Unauthorized';
-import NavBar from './components/common/NavBar';
+import "./App.scss";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import Explore from "./pages/Explore";
+import CreatePostPage from "./pages/CreatePostPage";
+import Inbox from "./components/messages/Inbox";
+import ChatRoom from "./components/messages/ChatRoom";
+import Logout from "./pages/Logout";
+import AdminDashboard from "./pages/AdminDashboard";
+import Unauthorized from "./pages/Unauthorized";
+import Messages from "./pages/Messages";
+import NavBar from "./components/common/NavBar";
 import { useEffect } from "react";
-import { checkAuthStatus, selectInitialCheckDone } from "./features/auth/authSlice";
+import {
+  checkAuthStatus,
+  selectInitialCheckDone,
+} from "./features/auth/authSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -26,10 +30,13 @@ function App() {
 
   const user = useSelector((state) => state.auth.user);
   const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
   const initialCheckDone = useSelector(selectInitialCheckDone);
 
-  const showNav = isAuthenticated && location.pathname !== '/login' && location.pathname !== '/register';
+  const showNav =
+    isAuthenticated &&
+    location.pathname !== "/login" &&
+    location.pathname !== "/register";
 
   if (!initialCheckDone) {
     return (
@@ -44,15 +51,35 @@ function App() {
       {showNav && <NavBar />}
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={isAuthenticated ? <Navigate to={location.state?.from || "/"} /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to={location.state?.from || "/"} /> : <Register />} />
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to={location.state?.from || "/"} />
+            ) : (
+              <Login />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? (
+              <Navigate to={location.state?.from || "/"} />
+            ) : (
+              <Register />
+            )
+          }
+        />
 
         {/* Auth-only routes */}
         {isAuthenticated ? (
           <>
             <Route path="/" element={<Home />} />
-            <Route path="/timeline" element={<Timeline />} />
+            <Route path="/explore" element={<Explore />} />
             <Route path="/create-post" element={<CreatePostPage />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:userId" element={<Messages />} />
             <Route path="/messages" element={<Inbox />} />
             <Route path="/chat/:userId" element={<ChatRoom />} />
             <Route path="/profile" element={<Profile />} />
@@ -61,11 +88,18 @@ function App() {
             {/* Admin-only routes */}
             <Route
               path="/admin"
-              element={isAdmin ? <AdminDashboard /> : <Navigate to="/unauthorized" />}
+              element={
+                isAdmin ? <AdminDashboard /> : <Navigate to="/unauthorized" />
+              }
             />
           </>
         ) : (
-          <Route path="*" element={<Navigate to="/login" state={{ from: location.pathname }} />} />
+          <Route
+            path="*"
+            element={
+              <Navigate to="/login" state={{ from: location.pathname }} />
+            }
+          />
         )}
 
         <Route path="/unauthorized" element={<Unauthorized />} />

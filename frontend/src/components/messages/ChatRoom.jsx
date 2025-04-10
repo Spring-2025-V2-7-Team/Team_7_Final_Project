@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { getMessages, sendMessage } from "../features/chat/chatAPI";
+import { useAuth } from "../../contexts/AuthContext";
+import { getMessages, sendMessage } from "../../features/chat/chatAPI";
 import {
   Box,
   Typography,
@@ -10,32 +9,34 @@ import {
   ListItemText,
   TextField,
   Button,
+  Avatar,
   Divider,
 } from "@mui/material";
+import '../../styles/Messages.scss';
 
-export default function ChatRoom() {
-  const { userId } = useParams();
-  const { currentUser } = useAuth(); 
+export default function ChatRoom({ user, onMessageSent }) {
+  const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const messageEndRef = useRef(null);
 
   useEffect(() => {
     const loadChat = async () => {
-      const msgs = await getMessages(userId);
+      if (!user) return;
+      const msgs = await getMessages(user.id);
       const formatted = msgs.map((m) => ({
         ...m,
-        fromSelf: m.sender_id === currentUser?.id,
+        fromSelf: Number(m.sender_id) === Number(currentUser?.id),
       }));
       setMessages(formatted);
     };
     loadChat();
-  }, [userId, currentUser]);
+  }, [user, currentUser]);
 
   useEffect(() => {
-    console.log(currentUser);
     const interval = setInterval(async () => {
-      const updated = await getMessages(userId);
+      if (!user) return;
+      const updated = await getMessages(user.id);
       const formatted = updated.map((m) => ({
         ...m,
         fromSelf: Number(m.sender_id) === Number(currentUser?.id),
@@ -44,28 +45,28 @@ export default function ChatRoom() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [userId, currentUser]);
+  }, [user, currentUser]);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
+  }, [messages]);
 
   const handleSend = async () => {
-    if (!text.trim()) return;
-    const newMsg = await sendMessage(userId, text.trim());
+    if (!text.trim() || !user) return;
+    const newMsg = await sendMessage(user.id, text.trim());
     setMessages((prev) => [...prev, { ...newMsg, fromSelf: true }]);
     setText("");
+    onMessageSent();
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        Chat with User {userId}
-      </Typography>
+    <Box sx={{ maxWidth: "100%", height: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Avatar src={user?.avatar_url} sx={{ mr: 2 }} />
+        <Typography variant="h6">{user?.name || `User ${user?.id}`}</Typography>
+      </Box>
       <Divider />
-      <List sx={{ maxHeight: "400px", overflowY: "auto", mt: 2 }}>
+      <List sx={{ maxHeight: "65vh", overflowY: "auto", mt: 2 }}>
         {messages.map((msg, index) => (
           <ListItem
             key={index}
@@ -85,7 +86,7 @@ export default function ChatRoom() {
         <div ref={messageEndRef} />
       </List>
 
-      <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+      <Box className='chat-send' sx={{ display: "flex", gap: 1, mt: 2 }}>
         <TextField
           fullWidth
           value={text}

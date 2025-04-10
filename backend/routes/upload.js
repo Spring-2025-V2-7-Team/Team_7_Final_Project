@@ -17,8 +17,6 @@ router.post("/", upload.single("file"), async (req, res) => {
   const { name, id } = req.body;
   const file = req.file;
 
-  console.log("UPLOAD BODY:", req.body);
-
   if (!name || !id || !file) {
     return res.status(400).json({ error: "Missing fields" });
   }
