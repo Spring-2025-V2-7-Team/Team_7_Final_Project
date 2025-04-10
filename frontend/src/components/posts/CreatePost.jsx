@@ -1,16 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, TextField, Button, Typography, Stack } from "@mui/material";
+import axios from "axios";
+import { fetchProfile } from "../../services/UserService";
 
 export default function CreatePost({ onSubmit }) {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const res = await fetchProfile();
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    loadUser();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content && !image) return;
-    onSubmit({ content, image });
-    setContent("");
-    setImage(null);
+    if (!user) return alert("User not loaded");
+
+    let imageUrl = "";
+    if (image) {
+      try {
+        setUploading(true);
+        const formData = new FormData();
+        formData.append("file", image);
+        formData.append("name", user.name);
+        formData.append("id", user.id);
+
+        const res = await axios.post("http://localhost:5000/api/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        imageUrl = res.data.url;
+      } catch (err) {
+        console.error("Image upload failed:", err);
+        alert("Image upload failed");
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    try {
+      await onSubmit({
+        user_id: user.id,
+        content,
+        image_url: imageUrl,
+      });
+      setContent("");
+      setImage(null);
+    } catch (err) {
+      console.error("Post creation failed:", err);
+      alert("Post creation failed");
+    }
   };
 
   return (
@@ -37,8 +90,8 @@ export default function CreatePost({ onSubmit }) {
           accept="image/*"
           onChange={(e) => setImage(e.target.files[0])}
         />
-        <Button type="submit" variant="contained">
-          Post
+        <Button type="submit" variant="contained" disabled={uploading}>
+          {uploading ? "Uploading..." : "Post"}
         </Button>
       </Stack>
     </Box>

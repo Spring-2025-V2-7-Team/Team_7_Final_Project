@@ -1,51 +1,74 @@
 import './App.scss';
-import { Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './components/routing/ProtectedRoute';
-
-import Home from './pages/Home';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import Unauthorized from './pages/Unauthorized';
-import NavBar from './components/common/NavBar';
 import Timeline from './pages/Timeline';
 import CreatePostPage from './pages/CreatePostPage';
 import Inbox from './pages/Inbox';
 import ChatRoom from './pages/ChatRoom';
 import Logout from './pages/Logout';
+import AdminDashboard from './pages/AdminDashboard';
+import Unauthorized from './pages/Unauthorized';
+import NavBar from './components/common/NavBar';
+import { useEffect } from "react";
+import { checkAuthStatus, selectInitialCheckDone } from "./features/auth/authSlice";
 
 function App() {
+  const dispatch = useDispatch();
+  const location = useLocation();
+
+  useEffect(() => {
+    dispatch(checkAuthStatus());
+  }, [dispatch]);
+
+  const user = useSelector((state) => state.auth.user);
+  const isAuthenticated = !!user;
+  const isAdmin = user?.role === 'admin';
+  const initialCheckDone = useSelector(selectInitialCheckDone);
+
+  const showNav = isAuthenticated && location.pathname !== '/login' && location.pathname !== '/register';
+
+  if (!initialCheckDone) {
+    return (
+      <div className="auth-loading">
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
   return (
     <>
-      <NavBar />
+      {showNav && <NavBar />}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/timeline" element={<Timeline />} />
-        <Route path="/create-post" element={<CreatePostPage />} />
-        <Route path="/messages" element={<Inbox />} />
-        <Route path="/chat/:userId" element={<ChatRoom />} />
-        <Route path="/logout" element={<Logout />} />
+        {/* Public routes */}
+        <Route path="/login" element={isAuthenticated ? <Navigate to={location.state?.from || "/"} /> : <Login />} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to={location.state?.from || "/"} /> : <Register />} />
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute role="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Auth-only routes */}
+        {isAuthenticated ? (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/timeline" element={<Timeline />} />
+            <Route path="/create-post" element={<CreatePostPage />} />
+            <Route path="/messages" element={<Inbox />} />
+            <Route path="/chat/:userId" element={<ChatRoom />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/logout" element={<Logout />} />
+
+            {/* Admin-only routes */}
+            <Route
+              path="/admin"
+              element={isAdmin ? <AdminDashboard /> : <Navigate to="/unauthorized" />}
+            />
+          </>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" state={{ from: location.pathname }} />} />
+        )}
+
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
     </>
   );

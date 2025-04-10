@@ -21,6 +21,7 @@ const commentRoutes = require('./routes/comments');
 const moderationRoutes = require('./routes/moderation');
 const notificationRoutes = require('./routes/notifications');
 const userRoutes = require('./routes/users');
+const uploadRoutes = require('./routes/upload');
 
 // Apply routes
 app.use('/api/auth', authRoutes);
@@ -30,6 +31,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/moderation', moderationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/upload', uploadRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

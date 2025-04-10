@@ -18,7 +18,7 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    role: "", // optional for role select
+    role: "",
   });
 
   const handleChange = (e) => {
@@ -35,7 +35,6 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-      <h2>Register</h2>
       <AuthForm
         type="register"
         showRole={true}

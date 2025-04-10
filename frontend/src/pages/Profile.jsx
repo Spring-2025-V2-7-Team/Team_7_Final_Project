@@ -1,29 +1,23 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { selectUser } from "../features/auth/authSlice";
-import {
-  getUserProfile,
-  updateUserProfile,
-  updateUserProfileImage,
-} from "../features/users/userAPI";
-
+import { updateUserProfile, getUserProfile } from "../features/users/userAPI";
 import {
   Box,
   TextField,
   Button,
-  Avatar,
   Typography,
+  Avatar,
   IconButton,
 } from "@mui/material";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import axios from "axios";
 
 export default function Profile() {
-  const user = useSelector(selectUser);
   const [profile, setProfile] = useState(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     const fetchProfile = async () => {
       try {
         const data = await getUserProfile();
@@ -59,11 +53,22 @@ export default function Profile() {
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !profile?.id) return;
+
     const formData = new FormData();
-    formData.append("avatar", file);
+    formData.append("file", file);
+    formData.append("name", profile.name);
+    formData.append("id", profile.id);
+
     try {
-      const { avatarUrl } = await updateUserProfileImage(user.id, formData);
+      const res = await axios.post("http://localhost:5000/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const avatarUrl = res.data.url;
+      // const updated = await updateUserProfile({ avatarUrl });
       setProfile((prev) => ({ ...prev, avatarUrl }));
     } catch (err) {
       console.error("Image upload failed:", err);

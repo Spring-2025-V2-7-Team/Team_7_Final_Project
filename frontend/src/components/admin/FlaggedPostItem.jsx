@@ -5,7 +5,7 @@ export default function FlaggedPostItem({ post, onApprove, onDelete }) {
     <Box sx={{ border: "1px solid #ccc", p: 2, mb: 2 }}>
       <Typography variant="body1">{post.content}</Typography>
       <Typography variant="caption" color="text.secondary">
-        Reported by: {post.reportedBy}
+        Reported by: {post.reported_by}
       </Typography>
       <Box mt={1} display="flex" gap={1}>
         <Button variant="outlined" onClick={() => onApprove(post.id)}>

@@ -1,18 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const moderationController = require('../controllers/moderationController');
-const authenticate = require('../middleware/auth');
-const requireAdmin = require('../middleware/admin');
+const authenticate = require("../middleware/auth");
+const admin = require("../middleware/admin");
+const moderationController = require("../controllers/moderationController");
 
-router.use(authenticate);
-router.use(requireAdmin);
+router.get("/flagged-posts", authenticate, admin, moderationController.getFlaggedPosts);
+router.get("/reported-users", authenticate, admin, moderationController.getReportedUsers);
+router.get("/reported-comments", authenticate, admin, moderationController.getReportedComments);
 
-router.get('/flagged-posts', moderationController.getFlaggedPosts);
-router.get('/reported-users', moderationController.getReportedUsers);
+router.post("/posts/:id/approve", authenticate, admin, moderationController.approvePost);
+router.delete("/posts/:id", authenticate, admin, moderationController.deletePost);
 
-router.patch('/ignore-user/:id', moderationController.ignoreUser);
-router.patch('/approve-post/:id', moderationController.approvePost);
-router.delete('/delete-post/:id', moderationController.deletePost);
-router.patch('/ban-user/:id', moderationController.banUser);
+router.post("/users/:id/ban", authenticate, admin, moderationController.banUser);
+router.post("/users/:id/ignore", authenticate, admin, moderationController.ignoreUser);
+
+router.delete("/comments/:id", authenticate, admin, moderationController.deleteComment);
+router.post("/comments/:id/ignore", authenticate, admin, moderationController.ignoreComment);
 
 module.exports = router;

@@ -2,65 +2,167 @@ const db = require("../db");
 
 exports.getFlaggedPosts = async (req, res) => {
   try {
-    const { rows } = await db.query(
-      `SELECT posts.*, users.name as author
-       FROM posts
-       JOIN users ON posts.user_id = users.id
-       WHERE posts.flagged = true`
+    const result = await db.query(
+      `SELECT p.*, u.name AS reported_by
+       FROM posts p
+       JOIN reports r ON r.target_id = p.id AND r.report_type = 'post'
+       JOIN users u ON u.id = r.reported_by
+       GROUP BY p.id, u.name
+       ORDER BY p.created_at DESC`
     );
-    res.json(rows);
+
+    res.json(result.rows);
   } catch (err) {
+    console.error("Failed to fetch flagged posts:", err);
     res.status(500).json({ error: "Failed to fetch flagged posts" });
   }
 };
 
 exports.getReportedUsers = async (req, res) => {
   try {
-    const { rows } = await db.query(
-      `SELECT * FROM users WHERE reported = true`
+    const result = await db.query(
+      `SELECT u.*, r.reason, r.created_at, r.reported_by
+       FROM reports r
+       JOIN users u ON r.target_id = u.id
+       WHERE r.report_type = 'user'`
     );
-    res.json(rows);
+    res.json(result.rows);
   } catch (err) {
+    console.error("Error fetching reported users:", err);
     res.status(500).json({ error: "Failed to fetch reported users" });
   }
 };
 
-exports.ignoreUser = async (req, res) => {
-  const { id } = req.params;
+exports.getReportedComments = async (req, res) => {
   try {
-    await db.query(`UPDATE users SET reported = false WHERE id = $1`, [id]);
-    res.sendStatus(204);
+    const result = await db.query(
+      `SELECT 
+         c.id AS comment_id,
+         c.text AS comment_text,
+         c.post_id,
+         p.content AS post_content,
+         r.reason,
+         r.created_at
+       FROM reports r
+       JOIN comments c ON r.target_id = c.id
+       JOIN posts p ON c.post_id = p.id
+       WHERE r.report_type = 'comment'
+       ORDER BY r.created_at DESC`
+    );
+
+    res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: "Failed to ignore user" });
+    console.error("Error fetching reported comments:", err);
+    res.status(500).json({ error: "Failed to fetch reported comments" });
   }
 };
 
 exports.approvePost = async (req, res) => {
-  const { id } = req.params;
+  const postId = req.params.id;
   try {
-    await db.query(`UPDATE posts SET flagged = false WHERE id = $1`, [id]);
+    await db.query(
+      `DELETE FROM reports WHERE report_type = 'post' AND target_id = $1`,
+      [postId]
+    );
     res.sendStatus(204);
   } catch (err) {
+    console.error("Error approving post:", err);
     res.status(500).json({ error: "Failed to approve post" });
   }
 };
 
 exports.deletePost = async (req, res) => {
-  const { id } = req.params;
+  const postId = parseInt(req.params.id);
   try {
-    await db.query(`DELETE FROM posts WHERE id = $1`, [id]);
-    res.sendStatus(204);
+    await db.query(`DELETE FROM likes WHERE post_id = $1`, [postId]);
+
+    await db.query(`DELETE FROM comments WHERE post_id = $1`, [postId]);
+
+    await db.query(`DELETE FROM posts WHERE id = $1`, [postId]);
+
+    res.json({ message: "Post and related data deleted successfully" });
   } catch (err) {
+    console.error("Failed to delete post:", err);
     res.status(500).json({ error: "Failed to delete post" });
   }
 };
 
 exports.banUser = async (req, res) => {
-  const { id } = req.params;
+  const userId = req.params.id;
   try {
-    await db.query(`UPDATE users SET banned = true WHERE id = $1`, [id]);
+    await db.query(`
+      DELETE FROM likes
+      WHERE post_id IN (SELECT id FROM posts WHERE user_id = $1)
+    `, [userId]);
+
+    await db.query(`DELETE FROM likes WHERE user_id = $1`, [userId]);
+
+    await db.query(`
+      DELETE FROM comments
+      WHERE post_id IN (SELECT id FROM posts WHERE user_id = $1)
+    `, [userId]);
+
+    await db.query(`DELETE FROM comments WHERE user_id = $1`, [userId]);
+
+    await db.query(`
+      DELETE FROM messages
+      WHERE sender_id = $1 OR receiver_id = $1
+    `, [userId]);
+
+    await db.query(`DELETE FROM notifications WHERE user_id = $1`, [userId]);
+
+    await db.query(`DELETE FROM reports WHERE report_type = 'user' AND target_id = $1`, [userId]);
+
+    await db.query(`DELETE FROM posts WHERE user_id = $1`, [userId]);
+
+    await db.query(`DELETE FROM users WHERE id = $1`, [userId]);
+
     res.sendStatus(204);
   } catch (err) {
-    res.status(500).json({ error: "Failed to ban user" });
+    console.error("Error deleting user and related data:", err);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+};
+
+exports.ignoreUser = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    await db.query(
+      `DELETE FROM reports WHERE report_type = 'user' AND target_id = $1`,
+      [userId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error("Error ignoring user:", err);
+    res.status(500).json({ error: "Failed to ignore user report" });
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  const commentId = req.params.id;
+  try {
+    await db.query(`DELETE FROM comments WHERE id = $1`, [commentId]);
+    await db.query(
+      `DELETE FROM reports WHERE report_type = 'comment' AND target_id = $1`,
+      [commentId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error("Error deleting comment:", err);
+    res.status(500).json({ error: "Failed to delete comment" });
+  }
+};
+
+exports.ignoreComment = async (req, res) => {
+  const commentId = req.params.id;
+  try {
+    await db.query(
+      `DELETE FROM reports WHERE report_type = 'comment' AND target_id = $1`,
+      [commentId]
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.error("Error ignoring comment report:", err);
+    res.status(500).json({ error: "Failed to ignore comment report" });
   }
 };

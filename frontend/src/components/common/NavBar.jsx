@@ -1,32 +1,35 @@
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import NotificationBell from '../notifications/NotificationBell';
 
 function NavBar() {
+  const user = useSelector((state) => state.auth.user);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
-        <Navbar.Brand href="/">ConnectWise</Navbar.Brand>
+        <Navbar.Brand as={NavLink} to="/">ConnectWise</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link href="/">Home</Nav.Link>
-            <Nav.Link href="/create-post">Create Post</Nav.Link>
-            <Nav.Link href="/timeline">Timeline</Nav.Link>
-            <Nav.Link href="/profile">Profile</Nav.Link>
-            <Nav.Link href="/messages">Messages</Nav.Link>
-            <Nav className="ms-auto">
-              <NotificationBell />
-            </Nav>
-            <NavDropdown title="More" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
-              <NavDropdown.Item href="/admin">Admin</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
-            </NavDropdown>
-          </Nav>
+          {isAuthenticated && (
+            <>
+              <Nav className="me-auto">
+                <Nav.Link as={NavLink} to="/create-post">Create Post</Nav.Link>
+                <Nav.Link as={NavLink} to="/timeline">Timeline</Nav.Link>
+                <Nav.Link as={NavLink} to="/profile">Profile</Nav.Link>
+                <Nav.Link as={NavLink} to="/messages">Messages</Nav.Link>
+                <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
+                {user?.role === 'admin' && (
+                  <Nav.Link as={NavLink} to="/admin">Admin</Nav.Link>
+                )}
+              </Nav>
+              <Nav className="ms-auto">
+                <NotificationBell />
+              </Nav>
+            </>
+          )}
         </Navbar.Collapse>
       </Container>
     </Navbar>

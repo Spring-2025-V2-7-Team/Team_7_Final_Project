@@ -50,11 +50,11 @@ const commentSlice = createSlice({
       })
 
       .addCase(addComment.fulfilled, (state, action) => {
-        const postId = action.meta.arg.postId;
-        if (!state.commentsByPost[postId]) {
-          state.commentsByPost[postId] = [];
-        }
-        state.commentsByPost[postId].push(action.payload);
+        // const postId = action.meta.arg.postId;
+        // if (!state.commentsByPost[postId]) {
+        //   state.commentsByPost[postId] = [];
+        // }
+        // state.commentsByPost[postId].push(action.payload);
       });
   },
 });

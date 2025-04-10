@@ -9,10 +9,7 @@ import {
   Link,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchComments,
-  addComment,
-} from "../../features/comment/commentSlice";
+import { fetchComments, addComment } from "../../features/comment/commentSlice";
 
 export default function CommentSection({ postId }) {
   const dispatch = useDispatch();
@@ -31,8 +28,9 @@ export default function CommentSection({ postId }) {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    dispatch(addComment({ postId, text: newComment.trim() }));
+    await dispatch(addComment({ postId, text: newComment.trim() }));
     setNewComment("");
+    dispatch(fetchComments(postId));
   };
 
   return (
