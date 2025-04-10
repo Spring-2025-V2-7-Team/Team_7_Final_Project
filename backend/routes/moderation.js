@@ -17,4 +17,6 @@ router.post("/users/:id/ignore", authenticate, admin, moderationController.ignor
 router.delete("/comments/:id", authenticate, admin, moderationController.deleteComment);
 router.post("/comments/:id/ignore", authenticate, admin, moderationController.ignoreComment);
 
+router.post("/reports", moderationController.createReport);
+
 module.exports = router;

@@ -90,28 +90,40 @@ exports.deletePost = async (req, res) => {
 exports.banUser = async (req, res) => {
   const userId = req.params.id;
   try {
-    await db.query(`
+    await db.query(
+      `
       DELETE FROM likes
       WHERE post_id IN (SELECT id FROM posts WHERE user_id = $1)
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     await db.query(`DELETE FROM likes WHERE user_id = $1`, [userId]);
 
-    await db.query(`
+    await db.query(
+      `
       DELETE FROM comments
       WHERE post_id IN (SELECT id FROM posts WHERE user_id = $1)
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     await db.query(`DELETE FROM comments WHERE user_id = $1`, [userId]);
 
-    await db.query(`
+    await db.query(
+      `
       DELETE FROM messages
       WHERE sender_id = $1 OR receiver_id = $1
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     await db.query(`DELETE FROM notifications WHERE user_id = $1`, [userId]);
 
-    await db.query(`DELETE FROM reports WHERE report_type = 'user' AND target_id = $1`, [userId]);
+    await db.query(
+      `DELETE FROM reports WHERE report_type = 'user' AND target_id = $1`,
+      [userId]
+    );
 
     await db.query(`DELETE FROM posts WHERE user_id = $1`, [userId]);
 
@@ -164,5 +176,20 @@ exports.ignoreComment = async (req, res) => {
   } catch (err) {
     console.error("Error ignoring comment report:", err);
     res.status(500).json({ error: "Failed to ignore comment report" });
+  }
+};
+
+exports.createReport = async (req, res) => {
+  const { report_type, target_id, reason, reported_by } = req.body;
+
+  try {
+    await db.query(
+      "INSERT INTO reports (report_type, target_id, reason, reported_by) VALUES ($1, $2, $3, $4)",
+      [report_type, target_id, reason, reported_by]
+    );
+    res.status(201).json({ message: "Report submitted successfully" });
+  } catch (err) {
+    console.error("Failed to submit report:", err);
+    res.status(500).json({ error: "Failed to submit report" });
   }
 };

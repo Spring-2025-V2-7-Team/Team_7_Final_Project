@@ -1,4 +1,5 @@
 import * as service from "../../services/ModerationService";
+import API from "../../services/api";
 
 export const getFlaggedPosts = async () => {
   const res = await service.fetchFlaggedPosts();
@@ -37,4 +38,9 @@ export const deleteComment = async (id) => {
 
 export const ignoreComment = async (id) => {
   await service.ignoreComment(id);
+};
+
+export const reportItem = async ({ report_type, target_id, reason, reported_by }) => {
+  const res = await API.post("/moderation/reports", { report_type, target_id, reason, reported_by });
+  return res.data;
 };
