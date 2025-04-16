@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -8,7 +9,10 @@ import {
   Select,
   TextField,
   Typography,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function AuthForm({
   formData,
@@ -19,6 +23,10 @@ export default function AuthForm({
   type = "login",
   showRole = false,
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+
   return (
     <Box
       component="form"
@@ -60,15 +68,24 @@ export default function AuthForm({
         required
       />
 
-      <TextField
+<TextField
         fullWidth
         label="Password"
         name="password"
-        type="password"
+        type={showPassword ? "text" : "password"}
         value={formData.password}
         onChange={onChange}
         margin="normal"
         required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={togglePasswordVisibility} edge="end">
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
 
       {showRole && (

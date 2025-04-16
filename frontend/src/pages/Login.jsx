@@ -45,7 +45,6 @@ export default function Login() {
         loading={loading}
         error={error}
       />
-      {/* 👉 Register Link */}
       <p style={{ textAlign: "center", marginTop: "1rem" }}>
         New here? <Link to="/register">Register</Link>
       </p>

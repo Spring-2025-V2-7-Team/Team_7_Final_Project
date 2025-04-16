@@ -68,8 +68,8 @@ export default function Profile() {
       });
 
       const avatarUrl = res.data.url;
-      // const updated = await updateUserProfile({ avatarUrl });
-      setProfile((prev) => ({ ...prev, avatarUrl }));
+      await updateUserProfile({ avatar_url: avatarUrl });
+      setProfile((prev) => ({ ...prev, avatar_url: avatarUrl }));
     } catch (err) {
       console.error("Image upload failed:", err);
     }
@@ -98,7 +98,7 @@ export default function Profile() {
       </Typography>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-        <Avatar src={profile.avatarUrl} sx={{ width: 80, height: 80 }} />
+        <Avatar src={profile.avatar_url} sx={{ width: 80, height: 80 }} />
         <label htmlFor="upload-avatar">
           <input
             accept="image/*"
