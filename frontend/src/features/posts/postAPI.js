@@ -33,3 +33,13 @@ export const fetchPostsByUser = async (userId) => {
   const res = await API.get(`/posts/user/${userId}`);
   return res.data;
 };
+
+export const fetchLikesByPost = async (postId) => {
+  const res = await API.get(`/posts/${postId}/likes`);
+  return res.data;
+};
+
+export const getPostById = async (postId) => {
+  const res = await API.get(`/posts/${postId}`);
+  return res.data;
+};

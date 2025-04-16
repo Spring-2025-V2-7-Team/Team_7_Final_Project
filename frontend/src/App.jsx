@@ -13,6 +13,7 @@ import Logout from "./pages/Logout";
 import AdminDashboard from "./pages/AdminDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import Messages from "./pages/Messages";
+import SinglePost from "./pages/SinglePost";
 import NavBar from "./components/common/NavBar";
 import { useEffect } from "react";
 import {
@@ -82,6 +83,7 @@ function App() {
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:userId" element={<Messages />} />
+            <Route path="/post/:postId" element={<SinglePost />} />
             <Route path="/messages" element={<Inbox />} />
             <Route path="/chat/:userId" element={<ChatRoom />} />
             <Route path="/profile" element={<Profile />} />

@@ -8,30 +8,50 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  List,
+  ListItem,
+  Avatar,
+  ListItemText,
 } from "@mui/material";
 import LikeButton from "./LikeButton";
 import CommentSection from "./CommentSection";
 import { formatDistanceToNow } from "date-fns";
 import ReportIcon from "@mui/icons-material/Report";
+import ShareIcon from "@mui/icons-material/Share";
 import { reportItem } from "../../features/moderation/moderationAPI";
+import { getAllUsers } from "../../features/users/userAPI";
+import { sendMessage } from "../../features/chat/chatAPI";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function PostCard({ post }) {
   const currentUser = useSelector((state) => state.auth.user);
-  const isValidImageUrl = (url) =>
-    typeof url === "string" && url.startsWith("http");
+  const isValidImageUrl = (url) => typeof url === "string" && url.startsWith("http");
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const handleReportClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const [shareOpen, setShareOpen] = useState(false);
+  const [users, setUsers] = useState([]);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // Fetch users for share dropdown
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await getAllUsers();
+        const filtered = res.filter((u) => u.id !== currentUser.id);
+        setUsers(filtered);
+      } catch (err) {
+        console.error("Error fetching users for sharing", err);
+      }
+    };
+    fetchUsers();
+  }, [currentUser.id]);
+
+  const handleReportClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
 
   const handleReportReason = async (reason) => {
     try {
@@ -50,6 +70,22 @@ export default function PostCard({ post }) {
     }
   };
 
+  const handleShareClick = () => setShareOpen(true);
+  const handleShareClose = () => setShareOpen(false);
+
+  const handleShareToUser = async (user) => {
+    try {
+      const postLink = `${window.location.origin}/post/${post.id}`;
+      const message = `Check out this post!\n\n${postLink}`;
+      await sendMessage(user.id, message);
+      alert(`Post shared with ${user.name}`);
+      handleShareClose();
+    } catch (err) {
+      console.error("Error sharing post:", err);
+      alert("Failed to share post.");
+    }
+  };  
+
   const reportReasons = [
     "Spam",
     "Harassment",
@@ -60,67 +96,87 @@ export default function PostCard({ post }) {
 
   return (
     <Card sx={{ mb: 2 }}>
-      {isValidImageUrl(post.image_url) && (
-        <CardMedia
-          component="img"
-          height="300"
-          image={post.image_url}
-          alt="Post image"
-          sx={{ objectFit: "cover" }}
-        />
-      )}
-
-      <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography variant="subtitle2" color="text.secondary">
-            {post.author || "Anonymous"}
-          </Typography>
-
-          <Tooltip title="Report Post">
-            <IconButton size="small" onClick={handleReportClick}>
-              <ReportIcon fontSize="small" color="error" />
-            </IconButton>
-          </Tooltip>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            {reportReasons.map((reason) => (
-              <MenuItem key={reason} onClick={() => handleReportReason(reason)}>
-                {reason}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
-
-        <Typography variant="body1" gutterBottom>
-          {post.content}
-        </Typography>
-
-        <Box mt={1}>
-          <LikeButton
-            postId={post.id}
-            initialLikes={post.like_count}
-            initialLiked={post.liked_by_user}
+      <Box display="flex" flexDirection={{ xs: "column", md: "row" }} alignItems="stretch">
+        {isValidImageUrl(post.image_url) && (
+          <CardMedia
+            component="img"
+            image={post.image_url}
+            alt="Post image"
+            sx={{
+              width: { xs: "100%", md: "50%" },
+              objectFit: "cover",
+              maxHeight: 400,
+            }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-            {post.created_at && !isNaN(new Date(post.created_at))
-              ? formatDistanceToNow(new Date(post.created_at), {
-                  addSuffix: true,
-                })
-              : "Unknown time"}
-          </Typography>
-        </Box>
+        )}
 
-        <CommentSection
-          postId={post.id}
-          initialComments={post.comments || []}
-        />
-      </CardContent>
+        <CardContent sx={{ width: { xs: "100%", md: "50%" } }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="subtitle2" color="text.secondary">
+              {post.author || "Anonymous"}
+            </Typography>
+
+            <Box>
+              <Tooltip title="Report Post">
+                <IconButton size="small" onClick={handleReportClick}>
+                  <ReportIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share Post">
+                <IconButton size="small" onClick={handleShareClick}>
+                  <ShareIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              {reportReasons.map((reason) => (
+                <MenuItem key={reason} onClick={() => handleReportReason(reason)}>
+                  {reason}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+
+          <Typography variant="body1" gutterBottom>
+            {post.content}
+          </Typography>
+
+          <Box mt={1}>
+            <LikeButton
+              postId={post.id}
+              initialLikes={post.like_count}
+              initialLiked={post.liked_by_user}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+              {post.created_at && !isNaN(new Date(post.created_at))
+                ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
+                : "Unknown time"}
+            </Typography>
+          </Box>
+
+          <CommentSection postId={post.id} initialComments={post.comments || []} />
+        </CardContent>
+      </Box>
+
+      {/* Share Dialog */}
+      <Dialog open={shareOpen} onClose={handleShareClose} fullWidth maxWidth="xs">
+        <DialogTitle>Share this post with a user</DialogTitle>
+        <List>
+          {users.map((user) => (
+            <ListItem button key={user.id} onClick={() => handleShareToUser(user)}>
+              <Avatar src={user.avatar_url} sx={{ mr: 1 }} />
+              <ListItemText primary={user.name} />
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
     </Card>
   );
 }

@@ -146,3 +146,64 @@ exports.getPostsByUser = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch posts by user" });
   }
 };
+
+exports.getLikesByPost = async (req, res) => {
+  const postId = req.params.id;
+  try {
+    const result = await db.query(
+      `SELECT u.id, u.name, u.avatar_url
+       FROM likes l
+       JOIN users u ON u.id = l.user_id
+       WHERE l.post_id = $1`,
+      [postId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching likes:", err);
+    res.status(500).json({ error: "Failed to fetch likes" });
+  }
+};
+
+exports.getPostById = async (req, res) => {
+  const postId = req.params.id;
+  const viewerId = req.user?.id || null;
+
+  try {
+    const result = await db.query(
+      `SELECT p.*, u.name AS author, u.avatar_url, 
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
+        EXISTS (SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) AS liked_by_user,
+        json_agg(
+          json_build_object(
+            'id', c.id,
+            'user_id', c.user_id,
+            'text', c.text,
+            'created_at', c.created_at,
+            'author', cu.name,
+            'avatar_url', cu.avatar_url
+          )
+        ) FILTER (WHERE c.id IS NOT NULL) AS comments
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      LEFT JOIN comments c ON p.id = c.post_id
+      LEFT JOIN users cu ON c.user_id = cu.id
+      WHERE p.id = $2
+      GROUP BY p.id, u.name, u.avatar_url`,
+      [viewerId, postId]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const post = result.rows[0];
+    post.like_count = parseInt(post.like_count);
+    post.liked_by_user = post.liked_by_user === true;
+    post.comments = post.comments || [];
+
+    res.json(post);
+  } catch (err) {
+    console.error("Error fetching post by ID:", err);
+    res.status(500).json({ error: "Failed to fetch post" });
+  }
+};

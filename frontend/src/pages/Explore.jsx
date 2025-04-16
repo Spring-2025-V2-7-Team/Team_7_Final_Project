@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
-import PostCard from "../components/posts/PostCard";
 import { fetchPosts } from "../features/posts/postAPI";
-import { Grid } from "@mui/material";
-import '../styles/Timeline.scss';
+import {
+  Dialog,
+  DialogContent,
+  ImageList,
+  ImageListItem,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import PostCard from "../components/posts/PostCard";
+import "../styles/Timeline.scss";
 
-export default function Timeline() {
+export default function Explore() {
   const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -15,15 +25,43 @@ export default function Timeline() {
     fetchFeed();
   }, []);
 
+  const handleOpen = (post) => setSelectedPost(post);
+  const handleClose = () => setSelectedPost(null);
+
   return (
-    <div style={{ maxWidth: "95%", margin: "auto", padding: "2rem" }}>
-      <Grid container spacing={3} className="post-grid">
+    <div style={{ padding: "2rem", maxWidth: 1200, margin: "auto" }}>
+      <ImageList
+        variant="masonry"
+        cols={isSmallScreen ? 2 : 3}
+        gap={12}
+        sx={{ margin: 0 }}
+      >
         {posts.map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post.id}>
-            <PostCard post={post} />
-          </Grid>
+          <ImageListItem
+            key={post.id}
+            onClick={() => handleOpen(post)}
+            style={{ cursor: "pointer" }}
+          >
+            <img
+              src={post.image_url}
+              alt={post.content}
+              loading="lazy"
+              style={{ width: "100%", height: "auto", borderRadius: 8 }}
+            />
+          </ImageListItem>
         ))}
-      </Grid>
+      </ImageList>
+
+      <Dialog
+        open={!!selectedPost}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogContent>
+          {selectedPost && <PostCard post={selectedPost} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

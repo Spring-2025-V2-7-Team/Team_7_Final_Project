@@ -8,13 +8,18 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   IconButton,
   Tooltip,
   TextField,
   Autocomplete,
   Menu,
   MenuItem,
+  Dialog,
+  DialogContent,
+  ImageList,
+  ImageListItem,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import ReportIcon from "@mui/icons-material/Report";
 import {
@@ -25,6 +30,7 @@ import {
 import { fetchPostsByUser } from "../features/posts/postAPI";
 import PostCard from "../components/posts/PostCard";
 import { reportItem } from "../features/moderation/moderationAPI";
+import "../styles/Timeline.scss";
 
 const REPORT_REASONS = [
   "Inappropriate behavior",
@@ -41,9 +47,13 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [dialogPost, setDialogPost] = useState(null);
   const { userId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const isViewingOwnProfile =
     !userId || String(currentUser?.id) === String(userId);
@@ -107,7 +117,7 @@ export default function Home() {
   if (!viewedUser) return <Typography>Loading profile...</Typography>;
 
   return (
-    <Box sx={{ maxWidth: "900px", margin: "auto", p: 3 }}>
+    <Box sx={{ maxWidth: "1000px", margin: "auto", p: 3 }}>
       {/* Profile Card */}
       <Card sx={{ display: "flex", alignItems: "center", p: 2, mb: 4 }}>
         <Avatar
@@ -170,22 +180,50 @@ export default function Home() {
             </Box>
           )}
           renderInput={(params) => (
-            <TextField {...params} label="Select a user" />
+            <TextField {...params} label="Select a friend" />
           )}
         />
       </Box>
 
-      {/* Posts */}
+      {/* Posts Grid Like Explore */}
       <Typography variant="h6" gutterBottom>
         {isViewingOwnProfile ? "Your Posts" : `${viewedUser.name}'s Posts`}
       </Typography>
-      <Grid container spacing={2}>
-        {(posts || []).map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post.id}>
-            <PostCard post={post} />
-          </Grid>
+      <ImageList
+        variant="masonry"
+        cols={isSmallScreen ? 2 : 3}
+        gap={12}
+        sx={{ margin: 0 }}
+      >
+        {posts.map((post) => (
+          <ImageListItem
+            key={post.id}
+            onClick={() => setDialogPost(post)}
+            style={{ cursor: "pointer" }}
+          >
+            <img
+              src={post.image_url}
+              alt={post.content}
+              loading="lazy"
+              style={{ width: "100%", height: "auto", borderRadius: 8 }}
+            />
+          </ImageListItem>
         ))}
-      </Grid>
+      </ImageList>
+
+      {/* Post Dialog */}
+      <Dialog
+        open={!!dialogPost}
+        onClose={() => setDialogPost(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        {dialogPost && (
+          <DialogContent sx={{ p: 0 }} style={{ padding: "1rem" }}>
+            <PostCard post={dialogPost} />
+          </DialogContent>
+        )}
+      </Dialog>
     </Box>
   );
 }
