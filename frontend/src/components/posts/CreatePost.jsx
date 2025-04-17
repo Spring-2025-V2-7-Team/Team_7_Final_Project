@@ -68,6 +68,7 @@ export default function CreatePost({ onSubmit }) {
     <Box
       component="form"
       onSubmit={handleSubmit}
+      style={{backgroundColor: 'rgba(var(--bs-tertiary-bg-rgb), 1) !important'}}
       sx={{ p: 2, mb: 3, border: "1px solid #ddd", borderRadius: 2 }}
     >
       <Typography variant="h6" gutterBottom>
@@ -82,7 +83,7 @@ export default function CreatePost({ onSubmit }) {
         onChange={(e) => setContent(e.target.value)}
         sx={{ mb: 2 }}
       />
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack direction="row" alignItems="center" style={{ justifyContent: 'space-between' }} spacing={2}>
         <input
           type="file"
           accept="image/*"

@@ -76,7 +76,7 @@ export default function Profile() {
     );
 
   return (
-    <Box
+    <Box style={{ backgroundColor: 'rgba(var(--bs-tertiary-bg-rgb), 1) !important' }}
       sx={{
         maxWidth: 600,
         mx: "auto",
