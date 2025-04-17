@@ -16,7 +16,7 @@ export default function CreatePostPage() {
   return (
     <div style={{ maxWidth: 600, margin: "auto" }}>
       <h2>Create Post</h2>
-      <CreatePost style={{backgroundColor: 'rgba(var(--bs-tertiary-bg-rgb), 1) !important'}} onSubmit={handleCreatePost} />
+      <CreatePost onSubmit={handleCreatePost} />
     </div>
   );
 }
