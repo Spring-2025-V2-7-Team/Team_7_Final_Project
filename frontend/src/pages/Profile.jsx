@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { updateUserProfile, getUserProfile } from "../features/users/userAPI";
+import {
+  fetchProfile,
+  updateProfile,
+  uploadProfileImage,
+} from "../services/UserService";
 import {
   Box,
   TextField,
@@ -9,7 +13,6 @@ import {
   IconButton,
 } from "@mui/material";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import axios from "axios";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -17,14 +20,13 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
-    const fetchProfile = async () => {
+    const fetchUserProfile = async () => {
       try {
-        const data = await getUserProfile();
+        const res = await fetchProfile();
         setProfile({
-          ...data,
-          bio: data.bio || "",
-          interests: data.interests || "",
+          ...res.data,
+          bio: res.data.bio || "",
+          interests: res.data.interests || "",
         });
       } catch (err) {
         console.error("Error fetching profile", err);
@@ -32,8 +34,8 @@ export default function Profile() {
         setLoading(false);
       }
     };
-    fetchProfile();
-  }, []);
+    fetchUserProfile();
+  }, []);  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,37 +45,28 @@ export default function Profile() {
   const handleSave = async () => {
     const { name, bio, interests } = profile;
     try {
-      const updated = await updateUserProfile({ name, bio, interests });
-      setProfile((prev) => ({ ...prev, ...updated }));
+      const updated = await updateProfile({ name, bio, interests });
+      setProfile((prev) => ({ ...prev, ...updated.data }));
       setEditing(false);
     } catch (err) {
       console.error("Failed to update profile:", err);
     }
   };
-
+  
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file || !profile?.id) return;
-
+  
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", profile.name);
-    formData.append("id", profile.id);
-
+    formData.append("avatar", file);
+  
     try {
-      const res = await axios.post("http://localhost:5000/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const avatarUrl = res.data.url;
-      await updateUserProfile({ avatar_url: avatarUrl });
-      setProfile((prev) => ({ ...prev, avatar_url: avatarUrl }));
+      const res = await uploadProfileImage(formData);
+      setProfile((prev) => ({ ...prev, avatar_url: res.data.avatar_url }));
     } catch (err) {
       console.error("Image upload failed:", err);
     }
-  };
+  };  
 
   if (loading || !profile)
     return (

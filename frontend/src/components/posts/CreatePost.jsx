@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Box, TextField, Button, Typography, Stack } from "@mui/material";
-import axios from "axios";
 import { fetchProfile } from "../../services/UserService";
+import { uploadPostImage } from "../../services/PostService";
 
 export default function CreatePost({ onSubmit }) {
   const [content, setContent] = useState("");
@@ -36,15 +36,7 @@ export default function CreatePost({ onSubmit }) {
         formData.append("name", user.name);
         formData.append("id", user.id);
 
-        const res = await axios.post(
-          "http://localhost:5000/api/upload",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const res = await uploadPostImage(formData);
 
         imageUrl = res.data.url;
       } catch (err) {
