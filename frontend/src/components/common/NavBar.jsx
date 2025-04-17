@@ -10,7 +10,7 @@ function NavBar() {
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
-        <Navbar.Brand as={NavLink} to="/">ConnectWise</Navbar.Brand>
+        <Navbar.Brand as={NavLink} to="/"><img src={`${process.env.PUBLIC_URL}/ConnectWise.png`} alt="ConnectWise" width="100px" /></Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           {isAuthenticated && (
