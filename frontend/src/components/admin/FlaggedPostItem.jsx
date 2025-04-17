@@ -2,7 +2,15 @@ import { Box, Typography, Button } from "@mui/material";
 
 export default function FlaggedPostItem({ post, onApprove, onDelete }) {
   return (
-    <Box style={{ backgroundColor: 'rgba(var(--bs-tertiary-bg-rgb), 1) !important' }} sx={{ border: "1px solid #ccc", p: 2, mb: 2 }}>
+    <Box
+      style={{
+        backgroundColor: "#fff",
+        boxShadow:
+          "0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12)",
+        border: "none",
+      }}
+      sx={{ p: 2, mb: 2 }}
+    >
       <Typography variant="body2" color="text.secondary" gutterBottom>
         Reported reason: {post.reason}
       </Typography>
