@@ -53,14 +53,16 @@ export default function LikeButton({ postId, initialLikes, initialLiked }) {
           )}
         </IconButton>
         <Typography variant="body2">{likes}</Typography>&nbsp;&nbsp;&nbsp;&nbsp;
-        <Link
-          component="button"
-          variant="body2"
-          underline="hover"
-          onClick={handleOpenLikes}
-        >
-          See who liked
-        </Link>
+        {likes > 0 && (
+          <Link
+            component="button"
+            variant="body2"
+            underline="hover"
+            onClick={handleOpenLikes}
+          >
+            See who liked
+          </Link>
+        )}
       </div>
 
       <Dialog

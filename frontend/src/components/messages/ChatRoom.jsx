@@ -13,6 +13,7 @@ import {
   Divider,
 } from "@mui/material";
 import '../../styles/Messages.scss';
+import PostCard from "../posts/PostCard";
 
 export default function ChatRoom({ user, onMessageSent }) {
   const { currentUser } = useAuth();
@@ -20,30 +21,22 @@ export default function ChatRoom({ user, onMessageSent }) {
   const [text, setText] = useState("");
   const messageEndRef = useRef(null);
 
+  const fetchMessages = async () => {
+    if (!user) return;
+    const msgs = await getMessages(user.id);
+    const formatted = msgs.map((m) => ({
+      ...m,
+      fromSelf: Number(m.sender_id) === Number(currentUser?.id),
+    }));
+    setMessages(formatted);
+  };
+
   useEffect(() => {
-    const loadChat = async () => {
-      if (!user) return;
-      const msgs = await getMessages(user.id);
-      const formatted = msgs.map((m) => ({
-        ...m,
-        fromSelf: Number(m.sender_id) === Number(currentUser?.id),
-      }));
-      setMessages(formatted);
-    };
-    loadChat();
+    fetchMessages();
   }, [user, currentUser]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!user) return;
-      const updated = await getMessages(user.id);
-      const formatted = updated.map((m) => ({
-        ...m,
-        fromSelf: Number(m.sender_id) === Number(currentUser?.id),
-      }));
-      setMessages(formatted);
-    }, 5000);
-
+    const interval = setInterval(fetchMessages, 5000);
     return () => clearInterval(interval);
   }, [user, currentUser]);
 
@@ -59,6 +52,34 @@ export default function ChatRoom({ user, onMessageSent }) {
     onMessageSent();
   };
 
+  const renderMessage = (msg, index) => {
+    let parsed = null;
+    try {
+      parsed = JSON.parse(msg.text);
+    } catch (_) {}
+
+    if (parsed?.type === "post_preview" && parsed?.post) {
+      return (
+        <Box sx={{ maxWidth: 400 }}>
+          <PostCard post={parsed.post} showLink={true} />
+          <div>Hey, check out this post!</div>
+        </Box>
+      );
+    }
+
+    return (
+      <ListItemText
+        primary={msg.text}
+        sx={{
+          maxWidth: "70%",
+          backgroundColor: msg.fromSelf ? "#d1e7dd" : "#f8d7da",
+          padding: "0.5rem 1rem",
+          borderRadius: "10px",
+        }}
+      />
+    );
+  };
+
   return (
     <Box sx={{ maxWidth: "100%", height: "100%" }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -72,21 +93,13 @@ export default function ChatRoom({ user, onMessageSent }) {
             key={index}
             sx={{ justifyContent: msg.fromSelf ? "flex-end" : "flex-start" }}
           >
-            <ListItemText
-              primary={msg.text}
-              sx={{
-                maxWidth: "70%",
-                backgroundColor: msg.fromSelf ? "#d1e7dd" : "#f8d7da",
-                padding: "0.5rem 1rem",
-                borderRadius: "10px",
-              }}
-            />
+            {renderMessage(msg, index)}
           </ListItem>
         ))}
         <div ref={messageEndRef} />
       </List>
 
-      <Box className='chat-send' sx={{ display: "flex", gap: 1, mt: 2 }}>
+      <Box className="chat-send" sx={{ display: "flex", gap: 1, mt: 2 }}>
         <TextField
           fullWidth
           value={text}

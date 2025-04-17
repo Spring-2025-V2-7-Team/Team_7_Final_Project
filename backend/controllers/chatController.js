@@ -4,12 +4,12 @@ exports.getUserChats = async (req, res) => {
   const userId = req.user.id;
   try {
     const chats = await Chat.getUserChats(userId);
-    const formatted = chats.map(chat => ({
-      userId: chat.sender_id === userId ? chat.receiver_id : chat.sender_id,
+    const formatted = chats.map((chat) => ({
+      userId: chat.user_id,
       name: chat.user_name,
       avatar: chat.avatar_url,
       lastMessage: chat.text,
-      lastMessageAt: chat.created_at
+      lastMessageTime: chat.created_at,
     }));
     res.json(formatted);
   } catch (err) {
@@ -39,8 +39,12 @@ exports.sendMessage = async (req, res) => {
   try {
     const message = await Chat.sendMessage(senderId, otherUserId, text);
 
-    const addNotification = require('../utils/addNotification');
-    await addNotification(otherUserId, 'message', `${req.user.name} sent you a message`);
+    const addNotification = require("../utils/addNotification");
+    await addNotification(
+      otherUserId,
+      "message",
+      `${req.user.name} sent you a message`
+    );
 
     res.status(201).json(message);
   } catch (err) {

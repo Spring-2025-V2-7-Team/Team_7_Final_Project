@@ -1,4 +1,44 @@
 const db = require("../db");
+const AWS = require("aws-sdk");
+require("dotenv").config();
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+exports.uploadProfileImage = async (req, res) => {
+  const userId = req.user.id;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const fileName = `images/${userId}_${Date.now()}.jpg`;
+  const s3Params = {
+    Bucket: "connectwise-app",
+    Key: fileName,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  };
+
+  try {
+    const data = await s3.upload(s3Params).promise();
+    const imageUrl = data.Location;
+
+    await db.query(
+      `UPDATE users SET avatar_url = $1 WHERE id = $2`,
+      [imageUrl, userId]
+    );
+
+    res.json({ avatar_url: imageUrl });
+  } catch (err) {
+    console.error("Failed to upload profile image:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+};
 
 exports.getProfile = async (req, res) => {
   const userId = req.user.id;

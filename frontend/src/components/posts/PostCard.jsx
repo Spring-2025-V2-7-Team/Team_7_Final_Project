@@ -26,7 +26,7 @@ import { sendMessage } from "../../features/chat/chatAPI";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, showLink = false }) {
   const currentUser = useSelector((state) => state.auth.user);
   const isValidImageUrl = (url) => typeof url === "string" && url.startsWith("http");
 
@@ -36,7 +36,6 @@ export default function PostCard({ post }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [users, setUsers] = useState([]);
 
-  // Fetch users for share dropdown
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -75,8 +74,10 @@ export default function PostCard({ post }) {
 
   const handleShareToUser = async (user) => {
     try {
-      const postLink = `${window.location.origin}/post/${post.id}`;
-      const message = `Check out this post!\n\n${postLink}`;
+      const message = JSON.stringify({
+        type: "post_preview",
+        post,
+      });
       await sendMessage(user.id, message);
       alert(`Post shared with ${user.name}`);
       handleShareClose();
@@ -84,7 +85,7 @@ export default function PostCard({ post }) {
       console.error("Error sharing post:", err);
       alert("Failed to share post.");
     }
-  };  
+  };
 
   const reportReasons = [
     "Spam",
@@ -177,6 +178,23 @@ export default function PostCard({ post }) {
           ))}
         </List>
       </Dialog>
+
+      {showLink && (
+        <Box textAlign="right" px={2} pb={2}>
+          <a
+            href={`/post/${post.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: "none",
+              color: "#1976d2",
+              fontWeight: "bold",
+            }}
+          >
+            🔗 View Full Post
+          </a>
+        </Box>
+      )}
     </Card>
   );
 }
