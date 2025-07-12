@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "team7finalproject-production.up.railway.app", 
+  baseURL: "team7finalproject-production.up.railway.app/api", 
   // baseURL: "http://localhost:5000/api",team7finalproject-production.up.railway.app
 });
 
